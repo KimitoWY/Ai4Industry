@@ -1,6 +1,3 @@
-import cv2
-import numpy as np
-from matplotlib import pyplot as plt
 from extract_frames import VideoProcessor
 from image_edge_processor import ImageEdgeProcessor
 import os

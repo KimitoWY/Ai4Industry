@@ -1,6 +1,10 @@
 # Ai4Industry
-Use-Case Serli \
-Groupe Reconnaissance contours circuit
+
+AI4Industry est un événement annuel organisé à au sein de l’ENSEIRB-MATMECA qui rassemble étudiants, chercheurs, entreprises et passionnés autour des applications de l’intelligence artificielle dans l’industrie. Cet événement est une occasion unique de découvrir des projets innovants, d’explorer des opportunités de carrière, et d’échanger avec des experts dans ce domaine en pleine expansion.
+
+## Groupe Reconnaissance contours circuit
+
+Use-Case Serli
 
 Notre but est de reconnaître les contours d'un circuit à partir des images enregistrée par une GoPro afin de déterminer la position d'un kart sur le circuit.
 

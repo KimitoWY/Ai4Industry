@@ -130,6 +130,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+./myenv/
 env/
 venv/
 myenv/
@@ -173,3 +174,5 @@ cython_debug/
 
 # Flux vidéo
 *.avi
+data
+output

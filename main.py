@@ -3,11 +3,14 @@ from image_edge_processor import ImageEdgeProcessor
 from model import create_unet_model, preprocess_images
 from tensorflow.keras.optimizers import Adam
 import os
+from codecarbon import EmissionsTracker
 os.environ["OPENCV_FFMPEG_READ_ATTEMPTS"] = "10000"
 
 if __name__ == "__main__":
-    # VideoProcessor.extract_frames("./data/20240914_target.mp4", "./output/")
-    # ImageEdgeProcessor.process_images_from_folder('./output/', "./canny/", 1, 1600)
+    tracker = EmissionsTracker()
+    tracker.start()
+    VideoProcessor.extract_frames("./data/20240914_target.mp4", "./output/")
+    ImageEdgeProcessor.process_images_from_folder('./output/', "./canny/", 1, 1600)
 
 
     # model = create_unet_model(input_shape=(256, 256, 1))
@@ -31,7 +34,7 @@ if __name__ == "__main__":
     history = model.fit(
         train_images, train_labels,
         validation_split=0.2,
-        epochs=25,
+        epochs=1,
         batch_size=8
     )
 
@@ -49,3 +52,5 @@ if __name__ == "__main__":
     # ImageEdgeProcessor.display_images(edges, curves_image)
 
     # ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
+    emissions : float = tracker.stop()
+    print(emissions)

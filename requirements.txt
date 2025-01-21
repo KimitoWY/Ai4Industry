@@ -1,3 +1,5 @@
+# requirements.txt
+
 absl-py==2.1.0
 anyio==4.8.0
 arrow==1.3.0
@@ -36,6 +38,7 @@ numpy==2.0.2
 nvidia-ml-py==12.560.30
 opencv-python==4.11.0.86
 opt_einsum==3.4.0
+Optimizers==0.1
 optree==0.14.0
 packaging==24.2
 pandas==2.2.3

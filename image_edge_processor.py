@@ -193,9 +193,47 @@ class ImageEdgeProcessor:
         # Créer une image vide pour dessiner les grandes courbes
         curves_image = np.zeros_like(edges)
 
+        # if lines is not None:
+        #     for line in lines:
+        #         x1, y1, x2, y2 = line[0]
+        #         cv2.line(curves_image, (x1, y1), (x2, y2), 255, thickness=2)
+
+        # if lines is not None:
+        #     for line in lines:
+        #         x1, y1, x2, y2 = line[0]
+
+        #         # Calculer les différences en x et y
+        #         delta_x = abs(x2 - x1)
+        #         delta_y = abs(y2 - y1)
+
+        #         # Conserver uniquement les lignes où delta_y > delta_x (plus verticales que horizontales)
+        #         if delta_y > delta_x:
+        #             cv2.line(curves_image, (x1, y1), (x2, y2), 255, thickness=2)
+
         if lines is not None:
+            # Stocker les lignes avec leurs longueurs
+            line_lengths = []
+
             for line in lines:
                 x1, y1, x2, y2 = line[0]
+
+                # # Calculer les différences en x et y
+                # delta_x = abs(x2 - x1)
+                # delta_y = abs(y2 - y1)
+
+                # # Conserver uniquement les lignes où delta_y > delta_x (plus verticales que horizontales)
+                # if delta_y > delta_x:
+                #     length = np.sqrt(delta_x**2 + delta_y**2)  # Calculer la longueur de la ligne
+                #     line_lengths.append(((x1, y1, x2, y2), length))
+
+            # Trier les lignes par longueur décroissante
+            line_lengths = sorted(line_lengths, key=lambda x: x[1], reverse=True)
+
+            # Conserver les `max_lines` lignes les plus longues
+            top_lines = line_lengths[:100]
+
+            # Dessiner ces lignes sur l'image
+            for (x1, y1, x2, y2), _ in top_lines:
                 cv2.line(curves_image, (x1, y1), (x2, y2), 255, thickness=2)
 
         # Sauvegarder l'image des grandes courbes
@@ -203,6 +241,53 @@ class ImageEdgeProcessor:
             cv2.imwrite(output_path, curves_image)
 
         return curves_image
+    
+    @staticmethod
+    def extract_centered_curves(edges, output_path=None, width_factor=0.3):
+        """
+        Extrait et redessine les courbes les plus proches du centre horizontal de l'image.
+        
+        Arguments :
+        - edges : np.ndarray : Image contenant les contours détectés (résultat de Canny).
+        - output_path : str : Chemin pour sauvegarder l'image résultante (optionnel).
+        - width_factor : float : Facteur de largeur pour la zone centrale (par défaut 0.3, soit 30%).
+        
+        Retourne :
+        - L'image avec les courbes/lignes assemblées et centrées.
+        """
+        # Dimensions de l'image
+        height, width = edges.shape
+        center_x = width // 2
+
+        # Définir la zone centrale
+        central_min_x = int(center_x - (width * width_factor / 2))
+        central_max_x = int(center_x + (width * width_factor / 2))
+
+        # Trouver les contours (pixels actifs)
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Créer une image vide pour les courbes centrales
+        centered_image = np.zeros_like(edges)
+
+        # Filtrer les contours proches du centre horizontal
+        for contour in contours:
+            # Vérifier si au moins un pixel du contour est dans la zone centrale
+            for point in contour:
+                x, y = point[0]
+                if central_min_x <= x <= central_max_x:
+                    cv2.drawContours(centered_image, [contour], -1, 255, thickness=2)
+                    break
+
+        # Optionnel : relier les fragments de contours dans la région centrale
+        # Appliquer une dilatation pour combiner les fragments proches
+        kernel = np.ones((5, 5), np.uint8)
+        assembled_image = cv2.dilate(centered_image, kernel, iterations=1)
+
+        # Sauvegarder l'image si un chemin est fourni
+        if output_path:
+            cv2.imwrite(output_path, assembled_image)
+
+        return assembled_image
     
     @staticmethod
     def new_process_video(video_path, scale=2, interpolation=cv2.INTER_AREA):
@@ -226,6 +311,7 @@ class ImageEdgeProcessor:
 
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         out_original = cv2.VideoWriter('original_output.avi', fourcc, fps, (width, height), False)
+        out_blur = cv2.VideoWriter('blur_output.avi', fourcc, fps, (width, height), False)
         out_edges = cv2.VideoWriter('edges_output.avi', fourcc, fps, (width, height), False)
         out_curves = cv2.VideoWriter('curves_output.avi', fourcc, fps, (width, height), False)
 
@@ -240,21 +326,32 @@ class ImageEdgeProcessor:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             gray_resized = cv2.resize(gray, (width, height), interpolation=interpolation)
 
+            blur = cv2.GaussianBlur(gray_resized, (5, 5), 0)
+
             # Détection des contours
-            edges = cv2.Canny(gray_resized, 150, 380)
+            edges = cv2.Canny(blur, 50, 200)
             kernel = np.ones((5, 5), np.uint8)
             edges = cv2.dilate(edges, kernel, iterations=1)
 
             # Détection des grandes courbes
-            curves = ImageEdgeProcessor.extract_large_curves(edges)
+            # curves = ImageEdgeProcessor.extract_large_curves(edges)
+            curves = ImageEdgeProcessor.extract_centered_curves(edges)
 
             # Sauvegarder chaque frame dans les vidéos
             out_original.write(gray_resized)
+            out_blur.write(blur)
             out_edges.write(edges)
             out_curves.write(curves)
 
             # Afficher les résultats
-            combined = np.hstack((gray_resized, edges, curves))
+            # Empilez les deux premières images horizontalement
+            top_row = np.hstack((gray_resized, blur))
+
+            # Empilez les deux suivantes images horizontalement
+            bottom_row = np.hstack((edges, curves))
+
+            # Empilez les deux rangées verticalement
+            combined = np.vstack((top_row, bottom_row))
             cv2.imshow('Original, Edges, and Curves', combined)
 
             # Arrêter si l'utilisateur appuie sur 'q'

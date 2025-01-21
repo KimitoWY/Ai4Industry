@@ -4,15 +4,17 @@ from model import create_unet_model, preprocess_images
 from tensorflow.keras.optimizers import Adam
 from write_csv import generate_csv_from_directory
 import os
+from codecarbon import EmissionsTracker
 os.environ["OPENCV_FFMPEG_READ_ATTEMPTS"] = "10000"
 
 if __name__ == "__main__":
-
     directory_path = "output"  # Replace with the path to your directory
     output_csv_path = "labels.csv"  # Replace with the desired output CSV file path
     generate_csv_from_directory(directory_path, output_csv_path)
     # VideoProcessor.extract_frames("./data/20240914_target.mp4", "./output/")
     # ImageEdgeProcessor.process_images_from_folder('./output/', "./canny/", 1, 1600)
+    tracker = EmissionsTracker()
+    tracker.start()
 
 
     # model = create_unet_model(input_shape=(256, 256, 1))
@@ -53,4 +55,6 @@ if __name__ == "__main__":
     # # curves_image = ImageEdgeProcessor.extract_large_curves(edges, './curves_frame_9004.png')
     # # ImageEdgeProcessor.display_images(edges, curves_image)
 
-    # # ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
+    # ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
+    emissions : float = tracker.stop()
+    print(emissions)

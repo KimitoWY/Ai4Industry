@@ -181,3 +181,4 @@ canny
 # nos fichiers de données
 /imageTest/
 /videoTest/
+*.h5

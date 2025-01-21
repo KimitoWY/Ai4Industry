@@ -128,6 +128,148 @@ class ImageEdgeProcessor:
         out_edges.release()
         cv2.destroyAllWindows()
 
+    @staticmethod
+    def detect_and_mask_edges(image_path, output_path, roi_corners):
+        """
+        Applique la détection des contours Canny sur une image et conserve uniquement les contours
+        dans une région d'intérêt définie.
+
+        Arguments :
+        - image_path : str : Chemin de l'image d'entrée.
+        - output_path : str : Chemin pour sauvegarder l'image résultante.
+        - roi_corners : list : Liste des points définissant un polygone pour la région d'intérêt (ROI).
+
+        Exemple de roi_corners :
+        roi_corners = [[(50, 720), (640, 360), (1230, 720)]]
+        """
+        # Charger l'image en niveaux de gris
+        image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        if image is None:
+            raise ValueError("Impossible de charger l'image à partir du chemin spécifié.")
+
+        # Appliquer la détection des contours (Canny)
+        edges = cv2.Canny(image, threshold1=100, threshold2=200)
+
+        # Créer un masque noir de la même taille que l'image
+        mask = np.zeros_like(edges)
+
+        # Convertir les coins de la région d'intérêt en un tableau numpy
+        roi_corners_np = np.array(roi_corners, dtype=np.int32)
+
+        # Dessiner la région d'intérêt sur le masque
+        cv2.fillPoly(mask, roi_corners_np, 255)
+
+        # Appliquer le masque sur l'image des contours
+        masked_edges = cv2.bitwise_and(edges, mask)
+
+        # Sauvegarder le résultat final
+        cv2.imwrite(output_path, masked_edges)
+
+        return masked_edges
+
+    @staticmethod
+    def extract_large_curves(edges, output_path = None):
+        """
+        Extrait et redessine uniquement les grandes courbes à partir d'une image d'entrée.
+        
+        Arguments :
+        - image_path : str : Chemin de l'image d'entrée.
+        - output_path : str : Chemin pour sauvegarder l'image résultante.
+
+        Retourne :
+        - L'image avec les grandes courbes dessinées.
+        """
+        # Charger l'image en niveaux de gris
+        # image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        # if image is None:
+        #     raise ValueError("Impossible de charger l'image à partir du chemin spécifié.")
+        
+        # Appliquer la détection des contours avec Canny
+        # edges = cv2.Canny(image, threshold1=100, threshold2=200)
+
+        # Appliquer la détection de lignes/courbes avec la Transformée de Hough
+        lines = cv2.HoughLinesP(edges, rho=1, theta=np.pi/180, threshold=100, minLineLength=50, maxLineGap=30)
+
+        # Créer une image vide pour dessiner les grandes courbes
+        curves_image = np.zeros_like(edges)
+
+        if lines is not None:
+            for line in lines:
+                x1, y1, x2, y2 = line[0]
+                cv2.line(curves_image, (x1, y1), (x2, y2), 255, thickness=2)
+
+        # Sauvegarder l'image des grandes courbes
+        if output_path is not None:
+            cv2.imwrite(output_path, curves_image)
+
+        return curves_image
+    
+    @staticmethod
+    def new_process_video(video_path, scale=2, interpolation=cv2.INTER_AREA):
+        """
+        Traite une vidéo, détecte les contours, redessine les grandes courbes, et sauvegarde les sorties.
+
+        Arguments :
+        - video_path (str) : Chemin de la vidéo d'entrée.
+        - scale (int) : Facteur d'échelle pour redimensionner les frames.
+        - interpolation : Méthode d'interpolation pour redimensionner.
+        """
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            print(f"Erreur lors de l'ouverture de la vidéo : {video_path}")
+            return
+
+        input_fps = cap.get(cv2.CAP_PROP_FPS)
+        fps = min(25, input_fps)
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) // scale
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) // scale
+
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        out_original = cv2.VideoWriter('original_output.avi', fourcc, fps, (width, height), False)
+        out_edges = cv2.VideoWriter('edges_output.avi', fourcc, fps, (width, height), False)
+        out_curves = cv2.VideoWriter('curves_output.avi', fourcc, fps, (width, height), False)
+
+        delay = int(1000 / fps)
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Convertir en niveaux de gris et redimensionner
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            gray_resized = cv2.resize(gray, (width, height), interpolation=interpolation)
+
+            # Détection des contours
+            edges = cv2.Canny(gray_resized, 150, 380)
+            kernel = np.ones((5, 5), np.uint8)
+            edges = cv2.dilate(edges, kernel, iterations=1)
+
+            # Détection des grandes courbes
+            curves = ImageEdgeProcessor.extract_large_curves(edges)
+
+            # Sauvegarder chaque frame dans les vidéos
+            out_original.write(gray_resized)
+            out_edges.write(edges)
+            out_curves.write(curves)
+
+            # Afficher les résultats
+            combined = np.hstack((gray_resized, edges, curves))
+            cv2.imshow('Original, Edges, and Curves', combined)
+
+            # Arrêter si l'utilisateur appuie sur 'q'
+            if cv2.waitKey(delay) & 0xFF == ord('q'):
+                break
+
+        # Libérer les ressources
+        cap.release()
+        out_original.release()
+        out_edges.release()
+        out_curves.release()
+        cv2.destroyAllWindows()
+    
+    
+
 # Example usage
 # ImageEdgeProcessor.process_images_from_folder('../imageTest/', 1, 2, 8)
 # ImageEdgeProcessor.process_video('../videoTest/test.mp4', 4)

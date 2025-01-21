@@ -37,3 +37,15 @@ if __name__ == "__main__":
 
     # Step 6: Save the model
     model.save("track_reconstruction_model.h5")
+
+    # images, edges = ImageEdgeProcessor.detect_edges('./imageTest/frame_9004.png', 4)
+    # ImageEdgeProcessor.display_images(images, edges)
+
+    # roi_corners = [[(50, 720), (640, 360), (1230, 720)]]
+    # masked_edges = ImageEdgeProcessor.detect_and_mask_edges('./imageTest/frame_9004.png', './masked_frame_9004.png', roi_corners)
+    # ImageEdgeProcessor.display_images(edges, masked_edges)
+
+    # curves_image = ImageEdgeProcessor.extract_large_curves(edges, './curves_frame_9004.png')
+    # ImageEdgeProcessor.display_images(edges, curves_image)
+
+    # ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)

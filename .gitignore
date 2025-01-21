@@ -177,3 +177,7 @@ cython_debug/
 data
 output
 canny
+
+# nos fichiers de données
+/imageTest/
+/videoTest/

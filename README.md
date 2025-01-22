@@ -17,6 +17,29 @@ LESPAGNOL Killian \
 LOYA Dylan \
 TRIBOUILLOIS Julien
 
+## Installation
+
+### Dépendances
+
+Un environnement Python est nécessaire pour lancer le projet. Les versions suivantes sont recommandées :
+- Python 3.12 maximum
+
+Pour installer le projet, il suffit de cloner le dépôt git et d'installer les dépendances.
+
+Ensuite, dans un terminal `bash`, il faut se placer dans le dossier Ai4Industry et installer les dépendances. (Un environnement virtuel sera automatiquement créé grâce au script d'installation)
+
+```bash
+./setup_environment.sh
+```
+
+### Lancement
+
+Pour lancer le projet, il suffit de lancer le script `main.py` avec Python.
+
+```bash
+python main.py
+```
+
 ## Fichier de documentation
 
 Notre fichier de documentation se trouve ici : [Google Docs](https://docs.google.com/document/d/1hk_b_O-R6k9tlzpkOYhZVsdVp4aHTr-BNDbaJqZFCWE/edit?usp=sharing)

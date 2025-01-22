@@ -3,6 +3,7 @@ from image_edge_processor import ImageEdgeProcessor
 # from model import create_unet_model, preprocess_images
 from model import load_data, create_classification_model
 from tensorflow.keras.optimizers import Adam
+from PIL import Image
 from write_csv import generate_csv_from_directory
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
@@ -11,6 +12,20 @@ from tensorflow.keras.models import load_model
 from model import predict_kart_position
 from codecarbon import EmissionsTracker
 os.environ["OPENCV_FFMPEG_READ_ATTEMPTS"] = "10000"
+
+def PosToXY(lat,lon):
+
+    # Ouvrir l'image
+    image = Image.open('data/Annecy.png')
+
+    # Obtenir les dimensions de l'image
+    width, height = image.size
+
+    xratio = (lon - 0.211025) / (0.2136273 - 0.211025)
+    yratio = 1.0 - ((lat - 47.9411527) / (47.943917 - 47.9411527))
+    x = int(float(width - 512)*xratio+0.5) + (512 / 2) + 64
+    y = int(float(height - 512)*yratio+0.5) + (512 / 2) + 64
+    return (x,y)
 
 if __name__ == "__main__":
     # directory_path = "output"  # Replace with the path to your directory

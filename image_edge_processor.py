@@ -313,7 +313,7 @@ class ImageEdgeProcessor:
         out_original = cv2.VideoWriter('original_output.avi', fourcc, fps, (width, height), False)
         out_blur = cv2.VideoWriter('blur_output.avi', fourcc, fps, (width, height), False)
         out_edges = cv2.VideoWriter('edges_output.avi', fourcc, fps, (width, height), False)
-        out_curves = cv2.VideoWriter('curves_output.avi', fourcc, fps, (width, height), False)
+        out_curves = cv2.VideoWriter('curves_output.mp4', fourcc, fps, (width, height), False)
 
         delay = int(1000 / fps)
 

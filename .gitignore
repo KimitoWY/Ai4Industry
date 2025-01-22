@@ -130,8 +130,10 @@ celerybeat.pid
 # Environments
 .env
 .venv
+./myenv/
 env/
 venv/
+myenv/
 ENV/
 env.bak/
 venv.bak/
@@ -169,3 +171,14 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Flux vidéo
+*.avi
+data
+output
+canny
+
+# nos fichiers de données
+/imageTest/
+/videoTest/
+*.h5

@@ -59,6 +59,7 @@ class TrackMatcher:
         Compare la frame actuelle avec le tracé de référence
         pour estimer la position sur le circuit
         """
+        print("start 1")
         # Extraire les points caractéristiques de la frame
         points = np.column_stack(np.where(canny_frame > 0))
         
@@ -70,16 +71,20 @@ class TrackMatcher:
             # Réinitialiser le matching à la position de départ
             return self.start_line[:2]  # Retourne le point de départ
         
+        print("2")
         # Sinon, chercher la meilleure correspondance avec le tracé
         track_points = np.column_stack(np.where(self.track_outline > 0))
         
+        print("3")
         # Calculer les distances entre les points de la frame et du tracé
         distances = pairwise_distances(points, track_points)
         
+        print("4")
         # Trouver le point du tracé le plus proche
         min_dist_idx = np.argmin(distances.min(axis=0))
         matched_position = track_points[min_dist_idx]
         
+        print("exiting")
         return matched_position
     
     def detect_start_line_in_frame(self, canny_frame):
@@ -130,21 +135,31 @@ def process_video_with_reference(video_path, satellite_image):
     """Traite la vidéo en utilisant l'image satellite comme référence"""
     matcher = TrackMatcher(satellite_image)
     cap = cv2.VideoCapture(video_path)
+
+    if not cap.isOpened():
+        print("Erreur lors de l'ouverture de la vidéo.")
+        return
     
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
         
+        print("Traitement de la frame...")
+
         # Appliquer Canny sur la frame
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         canny = cv2.Canny(gray, 50, 150)
         
+        print("Recherche de la position...")
         # Trouver la position correspondante sur le tracé
         matched_position = matcher.match_frame_position(canny)
         
+        print("Position trouvée:", matched_position)
         # Visualiser le résultat
         visualization = matcher.visualize_matching(canny, matched_position)
+
+        print("Affichage de la frame...")
         
         cv2.imshow('Track Matching', visualization)
         if cv2.waitKey(1) & 0xFF == ord('q'):

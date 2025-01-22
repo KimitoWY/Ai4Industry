@@ -9,6 +9,7 @@ Use-Case Serli
 Notre but est de reconnaître les contours d'un circuit à partir des images enregistrée par une GoPro afin de déterminer la position d'un kart sur le circuit.
 
 ## Développeurs
+
 BARRET Mathieu \
 BERROYER Théo \
 BRANDY Lucas \
@@ -22,6 +23,7 @@ TRIBOUILLOIS Julien
 ### Dépendances
 
 Un environnement Python est nécessaire pour lancer le projet. Les versions suivantes sont recommandées :
+
 - Python 3.12 maximum
 
 Pour installer le projet, il suffit de cloner le dépôt git et d'installer les dépendances.

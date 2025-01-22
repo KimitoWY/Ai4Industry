@@ -40,7 +40,6 @@ Pour lancer le projet, il suffit de lancer le script `main.py` avec Python.
 python main.py
 ```
 
-
 ## Fichier de documentation
 
 Notre fichier de documentation se trouve ici : [Google Docs](https://docs.google.com/document/d/1hk_b_O-R6k9tlzpkOYhZVsdVp4aHTr-BNDbaJqZFCWE/edit?usp=sharing)

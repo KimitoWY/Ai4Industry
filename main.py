@@ -28,8 +28,8 @@ if __name__ == "__main__":
     generate_csv_from_directory(directory_path, output_csv_path)
     # VideoProcessor.extract_frames("./data/20240914_target.mp4", "./output/")
     # ImageEdgeProcessor.process_images_from_folder('./output/', "./canny/", 1, 1600)
-    tracker = EmissionsTracker()
-    tracker.start()
+    #tracker = EmissionsTracker()
+    #tracker.start()
 
 
     # model = create_unet_model(input_shape=(256, 256, 1))
@@ -71,5 +71,5 @@ if __name__ == "__main__":
     # # ImageEdgeProcessor.display_images(edges, curves_image)
 
     ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
-    emissions : float = tracker.stop()
-    print(emissions)
+    #emissions : float = tracker.stop()
+    #print(emissions)

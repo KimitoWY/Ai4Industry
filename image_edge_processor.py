@@ -309,12 +309,17 @@ class ImageEdgeProcessor:
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) // scale
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) // scale
 
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out_original = cv2.VideoWriter('original_output.avi', fourcc, fps, (width, height), False)
-        out_blur = cv2.VideoWriter('blur_output.avi', fourcc, fps, (width, height), False)
-        out_edges = cv2.VideoWriter('edges_output.avi', fourcc, fps, (width, height), False)
-        out_curves = cv2.VideoWriter('curves_output.mp4', fourcc, fps, (width, height), False)
+        # Calculate the middle third vertically
+        third_height = height // 3
+        start_y = 3* third_height
+        end_y = 7 * third_height
+        width = width *2
 
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        out_original = cv2.VideoWriter('original_output.avi', fourcc, fps, (width, end_y - start_y), False)
+        out_blur = cv2.VideoWriter('blur_output.avi', fourcc, fps, (width, end_y - start_y), False)
+        out_edges = cv2.VideoWriter('edges_output.avi', fourcc, fps, (width, end_y - start_y), False)
+        out_curves = cv2.VideoWriter('curves_output.avi', fourcc, fps, (width, end_y - start_y), False)
         delay = int(1000 / fps)
 
         while cap.isOpened():
@@ -322,12 +327,15 @@ class ImageEdgeProcessor:
             if not ret:
                 break
 
+            # Crop the middle third vertically
+            frame_cropped = frame[start_y:end_y, :]
+
             # Contrast
-            contrasted =  cv2.convertScaleAbs(frame, alpha=0.9, beta=0)
+            contrasted =  cv2.convertScaleAbs(frame_cropped, alpha=0.9, beta=0)
 
             # Convertir en niveaux de gris et redimensionner
             gray = cv2.cvtColor(contrasted, cv2.COLOR_BGR2GRAY)
-            gray_resized = cv2.resize(gray, (width, height), interpolation=interpolation)
+            gray_resized = cv2.resize(gray, (width,  end_y - start_y), interpolation=interpolation)
 
             # Appliquer un flou pour réduire le bruit
             blur = cv2.GaussianBlur(gray_resized, (9, 9), 0)
@@ -338,22 +346,23 @@ class ImageEdgeProcessor:
             max_val = min(255, np.percentile(blur, 85))  # Relevez le seuil supérieur
 
             # Appliquer Canny avec des seuils dynamiques
-            edges = cv2.Canny(blur, min_val, max_val)
+            edges = cv2.Canny(blur, min_val, max_val, L2gradient=True)
 
             # Détection par segmentation des couleurs pour le blanc
-            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # Convertir en HSV pour mieux isoler les couleurs
+            hsv = cv2.cvtColor(frame_cropped, cv2.COLOR_BGR2HSV)  # Convertir en HSV pour mieux isoler les couleurs
             mask = cv2.inRange(hsv, (0, 0, 200), (180, 40, 255))  # Masque pour isoler les blancs
 
             # Nettoyage du masque pour réduire les petits points lumineux
             kernel = np.ones((5, 5), np.uint8)  # Kernel pour les opérations morphologiques
-            mask_cleaned = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)  # Ferme les trous
-            mask_cleaned = cv2.morphologyEx(mask_cleaned, cv2.MORPH_OPEN, kernel)  # Supprime les petits objets
+            morph_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+            mask_cleaned = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, morph_kernel)  # Ferme les trous
+            mask_cleaned = cv2.morphologyEx(mask_cleaned, cv2.MORPH_OPEN, morph_kernel)  # Supprime les petits objets
 
             # Flou gaussien pour adoucir les bords du masque
             mask_cleaned = cv2.GaussianBlur(mask_cleaned, (5, 5), 0)
             
             # Redimensionner le masque pour qu'il corresponde à gray_resized
-            mask_resized = cv2.resize(mask, (width, height), interpolation=interpolation)
+            mask_resized = cv2.resize(mask, (width,  end_y - start_y), interpolation=interpolation)
 
             # S'assurer que le masque est en type CV_8U
             mask_resized = mask_resized.astype(np.uint8)
@@ -364,9 +373,16 @@ class ImageEdgeProcessor:
             # Fusionner les résultats des blancs avec les contours détectés
             edges = cv2.bitwise_or(edges, masked_image)
 
+            # Morphologie mathématique pour affiner les contours
+            # morph_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+            # edges = cv2.morphologyEx(edges, cv2.MORPH_GRADIENT, morph_kernel, 3)  # Fermer les petits trous
+            # edges = cv2.morphologyEx(edges, cv2.MORPH_OPEN, morph_kernel) 
+
+
             # Détection des grandes courbes
             # curves = ImageEdgeProcessor.extract_large_curves(edges)
             curves = ImageEdgeProcessor.extract_centered_curves(edges)
+
 
             # Sauvegarder chaque frame dans les vidéos
             out_original.write(gray_resized)
@@ -396,7 +412,8 @@ class ImageEdgeProcessor:
         out_curves.release()
         cv2.destroyAllWindows()
     
-    
+
+
 
 # Example usage
 # ImageEdgeProcessor.process_images_from_folder('../imageTest/', 1, 2, 8)

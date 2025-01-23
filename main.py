@@ -1,14 +1,14 @@
-from extract_frames import VideoProcessor
-from image_edge_processor import ImageEdgeProcessor
-from model import load_data, create_classification_model
+from src.extract_frames import VideoProcessor
+from src.image_edge_processor import ImageEdgeProcessor
+from src.model import load_data, create_classification_model
 from tensorflow.keras.optimizers import Adam
 from PIL import Image
-from write_csv import generate_csv_from_directory
+from src.write_csv import generate_csv_from_directory
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 import os
 from tensorflow.keras.models import load_model
-from model import predict_kart_position
+from src.model import predict_kart_position
 from codecarbon import EmissionsTracker
 os.environ["OPENCV_FFMPEG_READ_ATTEMPTS"] = "10000"
 
@@ -32,8 +32,8 @@ if __name__ == "__main__":
     # generate_csv_from_directory(directory_path, output_csv_path)
     # VideoProcessor.extract_frames("./data/20240914_target.mp4", "./output/")
     # ImageEdgeProcessor.process_images_from_folder('./output/', "./canny/", 1, 1600)
-    # tracker = EmissionsTracker()
-    # tracker.start()
+    tracker = EmissionsTracker()
+    tracker.start()
 
 
     # Step 3: Load the training data
@@ -92,6 +92,7 @@ if __name__ == "__main__":
     # # curves_image = ImageEdgeProcessor.extract_large_curves(edges, './curves_frame_9004.png')
     # # ImageEdgeProcessor.display_images(edges, curves_image)
 
-    ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
-    # emissions : float = tracker.stop()
-    # print(emissions)
+    # ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
+    ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
+    emissions : float = tracker.stop()
+    print("Emissions : ", emissions, "kg CO2 \n")

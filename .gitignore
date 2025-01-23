@@ -178,6 +178,7 @@ curves_output.mp4
 data
 output
 canny
+output_segmented_images
 *.mp4
 
 # img
@@ -195,4 +196,3 @@ canny
 /output_find_contours/
 *.h5
 emissions.csv
-*.zip

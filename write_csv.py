@@ -1,6 +1,7 @@
 import os
 import csv
 
+# Used to create the csv on which we will train the AI to detect where the kart is on the road
 def generate_csv_from_directory(directory_path, output_csv_path):
     """
     Generate a CSV file with filenames and a default class '0' from the specified directory.

@@ -193,7 +193,6 @@ output_segmented_images
 # nos fichiers de données
 /imageTest/
 /videoTest/
-/output_find_contours/
 *.h5
 emissions.csv
 *.zip

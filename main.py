@@ -1,10 +1,7 @@
 from src.extract_frames import VideoProcessor
 from src.image_edge_processor import ImageEdgeProcessor
 from src.model import load_data, create_classification_model
-from extract_frames import VideoProcessor
-from image_edge_processor import ImageEdgeProcessor
-from map_satellite import generate_map
-from model import load_data, create_classification_model
+from src.map_satellite import generate_map
 from tensorflow.keras.optimizers import Adam
 from PIL import Image
 from src.write_csv import generate_csv_from_directory
@@ -15,6 +12,8 @@ from tensorflow.keras.models import load_model
 from src.model import predict_kart_position
 from codecarbon import EmissionsTracker
 import time
+from src.testFindContours import process_video as pv
+
 os.environ["OPENCV_FFMPEG_READ_ATTEMPTS"] = "10000"
 
 def PosToXY(lat,lon):
@@ -32,21 +31,13 @@ def PosToXY(lat,lon):
     return (x,y)
 
 if __name__ == "__main__":
+    ############### CREATE AND TRAIN THE AI TO DETECT THE KART POSITION ################
     # directory_path = "output"  # Replace with the path to your directory
     # output_csv_path = "labels.csv"  # Replace with the desired output CSV file path
     # generate_csv_from_directory(directory_path, output_csv_path)
     # VideoProcessor.extract_frames("./data/20240914_target.mp4", "./output/")
     # ImageEdgeProcessor.process_images_from_folder('./output/', "./canny/", 1, 1600)
-    
-     
-    tracker = EmissionsTracker()
-    start_time = time.time()
-    tracker.start()
-    
-   
-
-
-    # Step 3: Load the training data
+     # Step 3: Load the training data
     # image_dir = "output"  # Directory containing processed edge-detected images
     # csv_file = "labels copy.csv"  # Directory containing manually annotated labels (masks)
     # img_size = (256, 256)
@@ -69,28 +60,20 @@ if __name__ == "__main__":
 
     # # Save the trained model
     # model.save("kart_position_model.h5")
+    #################################################################################
+     
+    tracker = EmissionsTracker()
+    start_time = time.time()
+    tracker.start()
 
+   
+################################TEST THE AI TO KNOW THE KART POSITION#####################################
     # model = load_model("kart_position_model.h5")
     # image_path = "canny/frame_0591.jpg"
     # predicted_class = predict_kart_position(image_path, model)
-    # print(f"Predicted class: {predicted_class}")
+    # print(f"Predicted class: {predicted_class}"
+    # ####################################################################################################
 
-    # train_images, train_labels = preprocess_images(image_dir, label_dir, img_size)
-
-    # # Step 4: Compile the model
-    # model = create_unet_model(input_shape=(256, 256, 1))
-    # model.compile(optimizer=Adam(learning_rate=1e-4), loss='binary_crossentropy', metrics=['accuracy'])
-
-    # # Step 5: Train the model
-    # history = model.fit(
-    #     train_images, train_labels,
-    #     validation_split=0.2,
-    #     epochs=5,
-    #     batch_size=8
-    # )
-
-    # # Step 6: Save the model
-    # model.save("track_reconstruction_model.h5")
 
     # # images, edges = ImageEdgeProcessor.detect_edges('./imageTest/frame_9004.png', 4)
     # # ImageEdgeProcessor.display_images(images, edges)
@@ -103,17 +86,21 @@ if __name__ == "__main__":
     # # ImageEdgeProcessor.display_images(edges, curves_image)
 
     # ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
-    ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
-    emissions : float = tracker.stop()
+    # ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
+    # emissions : float = tracker.stop()
     
+    
+    
+    ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
+    pv('./edges_output.avi')
+    
+    
+    
+    # Generate the map
+    generate_map()
+    
+    emissions : float = tracker.stop()
     end_time = time.time()
     elapsed_time = end_time - start_time
     print("Elapsed time : ", elapsed_time, "s \n")
     print("Emissions : ", emissions, "kg CO2 \n")
-    
-    # ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
-    # emissions : float = tracker.stop()
-    # print(emissions)
-    
-    # Generate the map
-    generate_map()

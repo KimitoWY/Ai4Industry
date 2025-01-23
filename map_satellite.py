@@ -88,7 +88,7 @@ def plot_route(movements):
     m.save('route_map.html')
 
 # Définir les région a cacher (x1, y1, x2, y2)
-car_region = [((0, 0), (0, 0)), ((0, 270), (480, 130))]
+car_region = [((0, 0), (0, 0)), ((0, 0), (0, 0))]
 
 # Créer le masque
 image = cv2.imread('output_frames/frame_0000.png', cv2.IMREAD_GRAYSCALE)
@@ -118,7 +118,7 @@ if not os.path.exists("result"):
         os.makedirs("result")
 # Boucle sur les images pour suivre le mouvement
 # for i in range(frame_count - 1):
-for i in range(0, frame_count - 1, 8):
+for i in range(0, frame_count - 1,4):
     image_path = f'output_frames/frame_{i:04d}.png'
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if image is None:
@@ -126,7 +126,7 @@ for i in range(0, frame_count - 1, 8):
         continue
     mask = create_mask(image.shape, car_region)
     prev_keypoints, _ = detect_features(image_path,mask)
-    filtered_keypoints = filter_keypoints(prev_keypoints, min_response=0.0045, min_size=2)
+    filtered_keypoints = filter_keypoints(prev_keypoints, min_response=0.006, min_size=5)
 
     # Dessiner les points d'intérêt sur l'image
     image_with_keypoints = cv2.drawKeypoints(image, filtered_keypoints, None, color=(0, 255, 0))

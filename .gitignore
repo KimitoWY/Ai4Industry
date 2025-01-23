@@ -178,9 +178,21 @@ curves_output.mp4
 data
 output
 canny
+*.mp4
+
+# img
+*.csv
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+
 
 # nos fichiers de données
 /imageTest/
 /videoTest/
+/output_find_contours/
 *.h5
 emissions.csv
+*.zip

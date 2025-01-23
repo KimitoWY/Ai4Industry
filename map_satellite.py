@@ -74,8 +74,8 @@ def plot_route(movements,image_path='data/Ancenis.png'):
         coords.append([current_position[0, 0], current_position[2, 0]])
         count += 1
         
-    position_factor_x = 1000  # Ajuster ce facteur selon les dimensions de l'image
-    position_factor_y = 2500  # Ajuster ce facteur selon les dimensions de l'image
+    position_factor_x = 3000  # Ajuster ce facteur selon les dimensions de l'image
+    position_factor_y = 1500  # Ajuster ce facteur selon les dimensions de l'image
     scale_factor = 100  # Adjust this factor as needed to fit the image dimensions
     rotation_factor = 180  # Adjust this factor as needed for rotation in degrees
 
@@ -106,7 +106,7 @@ def generate_map():
     # Boucle sur les images pour suivre le mouvement
     # for i in range(frame_count - 1):
     for i in range(0, frame_count - 1,4):
-        image_path = f'output_frames/frame_{i:04d}.png'
+        image_path = f'output_find_contours/frame_{i+1}.png'
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
         if image is None:
             print(f"Image not found: {image_path}")
@@ -118,11 +118,11 @@ def generate_map():
         image_with_keypoints = cv2.drawKeypoints(image, filtered_keypoints, None, color=(0, 255, 0))
         cv2.imwrite(f"result/frame_{i:04d}_keypoints.png", image_with_keypoints)
 
-        good_prev_pts, good_next_pts = track_features(image_path, f'output_frames/frame_{i+1:04d}.png', filtered_keypoints)
+        good_prev_pts, good_next_pts = track_features(image_path, f'output_find_contours/frame_{i+2}.png', filtered_keypoints)
         # print(i)
         R, t = estimate_motion(good_prev_pts, good_next_pts)
         movements.append((R, t))
     # Afficher la carte
     plot_route(movements)
 
-
+generate_map()

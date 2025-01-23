@@ -1,10 +1,7 @@
 from src.extract_frames import VideoProcessor
 from src.image_edge_processor import ImageEdgeProcessor
 from src.model import load_data, create_classification_model
-from extract_frames import VideoProcessor
-from image_edge_processor import ImageEdgeProcessor
 from map_satellite import generate_map
-from model import load_data, create_classification_model
 from tensorflow.keras.optimizers import Adam
 from PIL import Image
 from src.write_csv import generate_csv_from_directory
@@ -103,13 +100,13 @@ if __name__ == "__main__":
     # # ImageEdgeProcessor.display_images(edges, curves_image)
 
     # ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
-    ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
-    emissions : float = tracker.stop()
+    # ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
+    # emissions : float = tracker.stop()
     
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print("Elapsed time : ", elapsed_time, "s \n")
-    print("Emissions : ", emissions, "kg CO2 \n")
+    # end_time = time.time()
+    # elapsed_time = end_time - start_time
+    # print("Elapsed time : ", elapsed_time, "s \n")
+    # print("Emissions : ", emissions, "kg CO2 \n")
     
     # ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
     # emissions : float = tracker.stop()

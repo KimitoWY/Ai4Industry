@@ -184,3 +184,5 @@ canny
 /videoTest/
 *.h5
 emissions.csv
+circuit_reconstruit.png
+circuit_sur_satellite.png

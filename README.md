@@ -9,6 +9,7 @@ Use-Case Serli
 Notre but est de reconnaître les contours d'un circuit à partir des images enregistrée par une GoPro afin de déterminer la position d'un kart sur le circuit.
 
 ## Développeurs
+
 BARRET Mathieu \
 BERROYER Théo \
 BRANDY Lucas \
@@ -16,6 +17,40 @@ LACAZE Yon \
 LESPAGNOL Killian \
 LOYA Dylan \
 TRIBOUILLOIS Julien
+
+## Installation
+
+### Dépendances
+
+Un environnement Python est nécessaire pour lancer le projet. Les versions suivantes sont recommandées :
+
+- Python 3.12 maximum
+
+Pour installer le projet, il suffit de cloner le dépôt git et d'installer les dépendances.
+
+Ensuite, dans un terminal `bash`, il faut se placer dans le dossier Ai4Industry et installer les dépendances. (Un environnement virtuel sera automatiquement créé grâce au script d'installation)
+
+```bash
+./setup_environment.sh
+```
+
+Dans le cas où le script n'active pas automatiquement l'environnement virtuel, il suffit de l'activer manuellement.
+
+```bash
+source .venv/bin/activate # Linux
+
+ou 
+
+source .venv/Scripts/activate # Windows
+```
+
+### Lancement
+
+Pour lancer le projet, il suffit de lancer le script `main.py` avec Python.
+
+```bash
+python main.py
+```
 
 ## Fichier de documentation
 

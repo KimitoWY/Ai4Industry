@@ -1,14 +1,14 @@
-from extract_frames import VideoProcessor
-from image_edge_processor import ImageEdgeProcessor
-from model import load_data, create_classification_model
+from src.extract_frames import VideoProcessor
+from src.image_edge_processor import ImageEdgeProcessor
+from src.model import load_data, create_classification_model
 from tensorflow.keras.optimizers import Adam
 from PIL import Image
-from write_csv import generate_csv_from_directory
+from src.write_csv import generate_csv_from_directory
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 import os
 from tensorflow.keras.models import load_model
-from model import predict_kart_position
+from src.model import predict_kart_position
 from codecarbon import EmissionsTracker
 os.environ["OPENCV_FFMPEG_READ_ATTEMPTS"] = "10000"
 

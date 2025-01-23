@@ -373,12 +373,6 @@ class ImageEdgeProcessor:
             # Fusionner les résultats des blancs avec les contours détectés
             edges = cv2.bitwise_or(edges, masked_image)
 
-            # Morphologie mathématique pour affiner les contours
-            # morph_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-            # edges = cv2.morphologyEx(edges, cv2.MORPH_GRADIENT, morph_kernel, 3)  # Fermer les petits trous
-            # edges = cv2.morphologyEx(edges, cv2.MORPH_OPEN, morph_kernel) 
-
-
             # Détection des grandes courbes
             # curves = ImageEdgeProcessor.extract_large_curves(edges)
             curves = ImageEdgeProcessor.extract_centered_curves(edges)

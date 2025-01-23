@@ -6,6 +6,12 @@ if [ ! -f requirements.txt ]; then
     exit 1
 fi
 
+# On vérifie si un environnement virtuel existe
+if [ -d .venv ] || [ -d venv ] || [ -d env ]; then
+    echo "Virtual environment already exists."
+    exit 1
+fi
+
 # On vérifie l'OS pour créer et activer l'environnement virtuel
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Linux

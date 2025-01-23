@@ -92,6 +92,6 @@ if __name__ == "__main__":
     # # curves_image = ImageEdgeProcessor.extract_large_curves(edges, './curves_frame_9004.png')
     # # ImageEdgeProcessor.display_images(edges, curves_image)
     
-    # ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
+    ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
     # emissions : float = tracker.stop()
     # print(emissions)

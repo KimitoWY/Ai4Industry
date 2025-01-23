@@ -322,6 +322,7 @@ class ImageEdgeProcessor:
         out_curves = cv2.VideoWriter('curves_output.avi', fourcc, fps, (width, end_y - start_y), False)
         delay = int(1000 / fps)
 
+        frame_count = 0
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -397,9 +398,13 @@ class ImageEdgeProcessor:
             # Empilez les deux suivantes images horizontalement
             bottom_row = np.hstack((edges, curves))
 
+            # enregistrer les images
+            cv2.imwrite(os.path.join("output_frames", f'frame_{frame_count:04d}.png'), edges)
+            frame_count += 1
+
             # Empilez les deux rangées verticalement
-            combined = np.vstack((top_row, bottom_row))
-            cv2.imshow('Original, Edges, and Curves', combined)
+            # combined = np.vstack((top_row, bottom_row))
+            # cv2.imshow('Original, Edges, and Curves', combined)
 
             # Arrêter si l'utilisateur appuie sur 'q'
             if cv2.waitKey(delay) & 0xFF == ord('q'):

@@ -34,6 +34,16 @@ Ensuite, dans un terminal `bash`, il faut se placer dans le dossier Ai4Industry 
 ./setup_environment.sh
 ```
 
+Dans le cas où le script n'active pas automatiquement l'environnement virtuel, il suffit de l'activer manuellement.
+
+```bash
+source .venv/bin/activate # Linux
+
+ou 
+
+source .venv/Scripts/activate # Windows
+```
+
 ### Lancement
 
 Pour lancer le projet, il suffit de lancer le script `main.py` avec Python.

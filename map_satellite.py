@@ -40,6 +40,10 @@ def create_mask(image_shape, regions):
         cv2.rectangle(mask, region[0], region[1], 0, -1)  # Dessiner un rectangle noir (0) sur chaque région
     return mask
 
+def filter_keypoints(keypoints, min_response=0.01, min_size=5):
+    filtered_keypoints = [kp for kp in keypoints if kp.response >= min_response and kp.size >= min_size]
+    return filtered_keypoints
+
 def track_features(prev_image_path, next_image_path, prev_keypoints):
     prev_image = cv2.imread(prev_image_path, cv2.IMREAD_GRAYSCALE)
     next_image = cv2.imread(next_image_path, cv2.IMREAD_GRAYSCALE)
@@ -69,8 +73,8 @@ def plot_route(movements):
     folium.PolyLine(coords, color="blue", weight=2.5, opacity=1).add_to(m)
     m.save('route_map.html')
 
-# Définir la région de la voiture (x1, y1, x2, y2)
-car_region = [((0, 350), (1920, 0)), ((0, 1080), (1920, 650))]  # Exemple de coordonnées, à ajuster selon votre image
+# Définir les région a cacher (x1, y1, x2, y2)
+car_region = [((0, 350), (1920, 0)), ((0, 1080), (1920, 650))]
 
 # Créer le masque
 image = cv2.imread('output_frames/frame_0000.png', cv2.IMREAD_GRAYSCALE)
@@ -79,17 +83,24 @@ mask = create_mask(image.shape, car_region)
 
 
 # Détecter les caractéristiques avec le masque
-prev_keypoints, descriptors = detect_features('output_frames/frame_0000.png', mask)
+prev_keypoints, descriptors = detect_features('output_frames/frame_0000.png')
 
-image_with_keypoints = cv2.drawKeypoints(cv2.imread('output_frames/frame_0000.png'), prev_keypoints, None, color=(0, 255, 0))
+# Filtrer les keypoints
+filtered_keypoints = filter_keypoints(prev_keypoints, min_response=0.001, min_size=2)
 
+# Dessiner les points d'intérêt sur l'image
+image_with_keypoints = cv2.drawKeypoints(cv2.imread('output_frames/frame_0000.png'), filtered_keypoints, None, color=(0, 255, 0))
 cv2.imwrite("frame_0000_keypoints.png", image_with_keypoints)
 
+'''
+# Suivre les caractéristiques
 good_prev_pts, good_next_pts = track_features('output_frames/frame_0000.png', 'output_frames/frame_0001.png', prev_keypoints)
 R, t = estimate_motion(good_prev_pts, good_next_pts)
 
+
 frame_count = 1575
 movements = []
+# Boucle sur les images pour suivre le mouvement
 for i in range(frame_count - 1):
     image = cv2.imread(f'output_frames/frame_{i:04d}.png', cv2.IMREAD_GRAYSCALE)
     mask = create_mask(image.shape, car_region)
@@ -97,5 +108,6 @@ for i in range(frame_count - 1):
     good_prev_pts, good_next_pts = track_features(f'output_frames/frame_{i:04d}.png', f'output_frames/frame_{i+1:04d}.png', prev_keypoints)
     R, t = estimate_motion(good_prev_pts, good_next_pts)
     movements.append((R, t))
-
+# Afficher la carte
 plot_route(movements)
+'''

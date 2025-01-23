@@ -171,7 +171,7 @@ class ImageEdgeProcessor:
     def extract_large_curves(edges, output_path = None):
         """
         Extrait et redessine uniquement les grandes courbes à partir d'une image d'entrée.
-        
+
         Arguments :
         - image_path : str : Chemin de l'image d'entrée.
         - output_path : str : Chemin pour sauvegarder l'image résultante.
@@ -183,7 +183,7 @@ class ImageEdgeProcessor:
         # image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
         # if image is None:
         #     raise ValueError("Impossible de charger l'image à partir du chemin spécifié.")
-        
+
         # Appliquer la détection des contours avec Canny
         # edges = cv2.Canny(image, threshold1=100, threshold2=200)
 
@@ -241,17 +241,17 @@ class ImageEdgeProcessor:
             cv2.imwrite(output_path, curves_image)
 
         return curves_image
-    
+
     @staticmethod
     def extract_centered_curves(edges, output_path=None, width_factor=0.3):
         """
         Extrait et redessine les courbes les plus proches du centre horizontal de l'image.
-        
+
         Arguments :
         - edges : np.ndarray : Image contenant les contours détectés (résultat de Canny).
         - output_path : str : Chemin pour sauvegarder l'image résultante (optionnel).
         - width_factor : float : Facteur de largeur pour la zone centrale (par défaut 0.3, soit 30%).
-        
+
         Retourne :
         - L'image avec les courbes/lignes assemblées et centrées.
         """
@@ -288,7 +288,7 @@ class ImageEdgeProcessor:
             cv2.imwrite(output_path, assembled_image)
 
         return assembled_image
-    
+
     @staticmethod
     def new_process_video(video_path, scale=2, interpolation=cv2.INTER_AREA):
         """
@@ -360,7 +360,7 @@ class ImageEdgeProcessor:
 
             # Flou gaussien pour adoucir les bords du masque
             mask_cleaned = cv2.GaussianBlur(mask_cleaned, (5, 5), 0)
-            
+
             # Redimensionner le masque pour qu'il corresponde à gray_resized
             mask_resized = cv2.resize(mask, (width,  end_y - start_y), interpolation=interpolation)
 
@@ -405,10 +405,3 @@ class ImageEdgeProcessor:
         out_edges.release()
         out_curves.release()
         cv2.destroyAllWindows()
-    
-
-
-
-# Example usage
-# ImageEdgeProcessor.process_images_from_folder('../imageTest/', 1, 2, 8)
-# ImageEdgeProcessor.process_video('../videoTest/test.mp4', 4)

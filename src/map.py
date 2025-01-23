@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-# Dimensions de la carte globale (ajustez selon la taille de votre circuit)
+# Dimensions de la carte globale
 MAP_WIDTH = 2000
 MAP_HEIGHT = 2000
 

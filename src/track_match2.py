@@ -8,7 +8,7 @@ class TrackMatcher:
         self.track_outline = None
         self.start_line = None
         self.kdtree = None
-        self.initialize_reference_track()    
+        self.initialize_reference_track()
 
     def initialize_reference_track(self):
         """Extrait le tracé du circuit depuis l'image satellite"""
@@ -92,7 +92,7 @@ class TrackMatcher:
         blur = cv2.GaussianBlur(binary, (5, 5), 0)
 
         anisotropic = TrackMatcher.apply_anisotropic_filter(binary, iterations=2, kappa=50, gamma=0.1)
-        cv2.imwrite('satellite_anisotropic.png', anisotropic)        
+        cv2.imwrite('satellite_anisotropic.png', anisotropic)
 
         # Appliquer un filtre noir ou blanc
         # _, binary = cv2.threshold(image_resized, 105, 255, cv2.THRESH_BINARY)
@@ -120,21 +120,21 @@ class TrackMatcher:
 
         cv2.imshow('edges', image_resized)
         cv2.imshow('edges2', image_resized2)
-        
+
         return image_resized , image_resized2
 
     def detect_start_line(self):
         """Détecte la ligne de départ dans l'image satellite"""
         # Appliquer la détection de lignes de Hough
         lines = cv2.HoughLinesP(
-            self.track_outline, 1, np.pi/180, 50, 
+            self.track_outline, 1, np.pi/180, 50,
             minLineLength=100, maxLineGap=10
         )
-        
+
         if lines is not None:
             # Prendre la ligne la plus horizontale comme ligne de départ
             start_line = min(
-                lines, 
+                lines,
                 key=lambda l: abs(np.arctan2(l[0][3]-l[0][1], l[0][2]-l[0][0]))
             )
             self.start_line = start_line[0]
@@ -142,62 +142,62 @@ class TrackMatcher:
     def match_frame_position(self, canny_frame):
         """Version optimisée du matching de position"""
         # Redimensionner la frame pour correspondre à l'échelle du tracé
-        canny_frame = cv2.resize(canny_frame, 
-                               (self.track_outline.shape[1], 
+        canny_frame = cv2.resize(canny_frame,
+                               (self.track_outline.shape[1],
                                 self.track_outline.shape[0]))
-        
+
         # Sous-échantillonner les points de la frame
         points = np.column_stack(np.where(canny_frame > 0))[::20]  # Prendre 1 point sur 20
-        
+
         if len(points) == 0:
             return None
-            
+
         # Si une ligne de départ est détectée
         if self.detect_start_line_in_frame(canny_frame):
             return self.start_line[:2]
-            
+
         # Utiliser KD-Tree pour trouver le point le plus proche
         distance, index = self.kdtree.query(points, k=1)
-        
+
         # Prendre le point avec la distance minimale
         best_match_idx = np.argmin(distance)
         matched_position = points[best_match_idx]
-        
+
         return matched_position
 
     def detect_start_line_in_frame(self, canny_frame):
         """Version optimisée de la détection de ligne de départ"""
         # Réduire la zone de recherche à la partie supérieure de l'image
         search_region = canny_frame[:canny_frame.shape[0]//3, :]
-        
+
         lines = cv2.HoughLinesP(
-            search_region, 1, np.pi/180, 
+            search_region, 1, np.pi/180,
             threshold=50,
             minLineLength=50,  # Réduit pour plus de robustesse
             maxLineGap=20
         )
-        
+
         if lines is None:
             return False
-            
+
         # Vectoriser le calcul des angles
         dx = lines[:, 0, 2] - lines[:, 0, 0]
         dy = lines[:, 0, 3] - lines[:, 0, 1]
         angles = np.abs(np.arctan2(dy, dx))
-        
+
         # Vérifier si au moins une ligne est proche de l'horizontale
         return np.any(angles < 0.1)
-    
+
     def visualize_matching(self, canny_frame, matched_position):
         """Visualise la position matchée sur le tracé de référence"""
         if matched_position is None:
             return self.track_outline.copy()
-        
+
         visualization = cv2.cvtColor(self.track_outline, cv2.COLOR_GRAY2BGR)
         # Marquer la position matchée
         cv2.circle(
-            visualization, 
-            (int(matched_position[1]), int(matched_position[0])), 
+            visualization,
+            (int(matched_position[1]), int(matched_position[0])),
             5, (0, 0, 255), -1
         )
         # Dessiner la ligne de départ
@@ -208,24 +208,9 @@ class TrackMatcher:
                 (self.start_line[2], self.start_line[3]),
                 (0, 255, 0), 2
             )
-        
+
         return visualization
-    
-    def detect_start_line(self):
-        """Détecte la ligne de départ dans l'image satellite"""
-        # Appliquer la détection de lignes de Hough
-        lines = cv2.HoughLinesP(
-            self.track_outline, 1, np.pi/180, 50, 
-            minLineLength=100, maxLineGap=10
-        )
-        
-        if lines is not None:
-            # Prendre la ligne la plus horizontale comme ligne de départ
-            start_line = min(
-                lines, 
-                key=lambda l: abs(np.arctan2(l[0][3]-l[0][1], l[0][2]-l[0][0]))
-            )
-            self.start_line = start_line[0]
+
 
 def process_video_with_reference(video_path, satellite_image):
     """Traite la vidéo en utilisant l'image satellite comme référence"""
@@ -235,28 +220,23 @@ def process_video_with_reference(video_path, satellite_image):
     if not cap.isOpened():
         print("Erreur lors de l'ouverture de la vidéo.")
         return
-    
+
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
-        
-        print("Traitement de la frame...")
 
         # Appliquer Canny sur la frame
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         canny = cv2.Canny(gray, 50, 150)
-        
-        print("Recherche de la position...")
+
         # Trouver la position correspondante sur le tracé
         matched_position = matcher.match_frame_position(canny)
-        
-        print("Position trouvée:", matched_position)
+
         # Visualiser le résultat
         visualization = matcher.visualize_matching(canny, matched_position)
 
-        print("Affichage de la frame...")
-        
+
         cv2.imshow('Track Matching', visualization)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -264,16 +244,6 @@ def process_video_with_reference(video_path, satellite_image):
         # Sauvegarder la visualisation
         output_frame = cv2.cvtColor(visualization, cv2.COLOR_BGR2RGB)
         cv2.imwrite(f'test/output_frame_{cap.get(cv2.CAP_PROP_POS_FRAMES):04.0f}.png', output_frame)
-    
+
     cap.release()
     cv2.destroyAllWindows()
-    
-
-# Charger l'image satellite
-satellite_image = cv2.imread('satellite_crop.png')
-
-# Traiter la vidéo
-# process_video_with_reference('curves_output.avi', satellite_image)
-
-matcher = TrackMatcher(satellite_image)
-print("its good")

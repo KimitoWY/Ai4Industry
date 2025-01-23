@@ -197,3 +197,8 @@ output_segmented_images
 *.h5
 emissions.csv
 *.zip
+circuit_reconstruit.png
+circuit_sur_satellite.png
+output_frames/
+./curves_output.mp4
+result/

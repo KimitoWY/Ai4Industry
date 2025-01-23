@@ -1,6 +1,10 @@
 from src.extract_frames import VideoProcessor
 from src.image_edge_processor import ImageEdgeProcessor
 from src.model import load_data, create_classification_model
+from extract_frames import VideoProcessor
+from image_edge_processor import ImageEdgeProcessor
+from map_satellite import generate_map
+from model import load_data, create_classification_model
 from tensorflow.keras.optimizers import Adam
 from PIL import Image
 from src.write_csv import generate_csv_from_directory
@@ -96,3 +100,10 @@ if __name__ == "__main__":
     ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
     emissions : float = tracker.stop()
     print("Emissions : ", emissions, "kg CO2 \n")
+    
+    # ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
+    # emissions : float = tracker.stop()
+    # print(emissions)
+    
+    # Generate the map
+    generate_map()

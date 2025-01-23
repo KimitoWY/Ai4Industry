@@ -322,6 +322,7 @@ class ImageEdgeProcessor:
         out_curves = cv2.VideoWriter('curves_output.avi', fourcc, fps, (width, end_y - start_y), False)
         delay = int(1000 / fps)
 
+        frame_count = 0
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -384,6 +385,10 @@ class ImageEdgeProcessor:
             out_edges.write(edges)
             out_curves.write(curves)
 
+
+            # enregistrer les images
+            cv2.imwrite(os.path.join("output_frames", f'frame_{frame_count:04d}.png'), edges)
+            frame_count += 1
 
             # Empilez les deux rangées verticalement
             combined = np.hstack((gray_resized, blur, edges))

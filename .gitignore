@@ -178,6 +178,7 @@ curves_output.mp4
 data
 output
 canny
+output_segmented_images
 
 # nos fichiers de données
 /imageTest/

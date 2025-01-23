@@ -384,15 +384,9 @@ class ImageEdgeProcessor:
             out_edges.write(edges)
             out_curves.write(curves)
 
-            # Afficher les résultats
-            # Empilez les deux premières images horizontalement
-            top_row = np.hstack((gray_resized, blur))
-
-            # Empilez les deux suivantes images horizontalement
-            bottom_row = np.hstack((edges, curves))
 
             # Empilez les deux rangées verticalement
-            combined = np.vstack((top_row, bottom_row))
+            combined = np.hstack((gray_resized, blur, edges))
             cv2.imshow('Original, Edges, and Curves', combined)
 
             # Arrêter si l'utilisateur appuie sur 'q'

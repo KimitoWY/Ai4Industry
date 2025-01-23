@@ -10,6 +10,7 @@ import os
 from tensorflow.keras.models import load_model
 from src.model import predict_kart_position
 from codecarbon import EmissionsTracker
+import time
 os.environ["OPENCV_FFMPEG_READ_ATTEMPTS"] = "10000"
 
 def PosToXY(lat,lon):
@@ -32,8 +33,13 @@ if __name__ == "__main__":
     # generate_csv_from_directory(directory_path, output_csv_path)
     # VideoProcessor.extract_frames("./data/20240914_target.mp4", "./output/")
     # ImageEdgeProcessor.process_images_from_folder('./output/', "./canny/", 1, 1600)
+    
+     
     tracker = EmissionsTracker()
+    start_time = time.time()
     tracker.start()
+    
+   
 
 
     # Step 3: Load the training data
@@ -95,4 +101,8 @@ if __name__ == "__main__":
     # ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
     ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
     emissions : float = tracker.stop()
+    
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print("Elapsed time : ", elapsed_time, "s \n")
     print("Emissions : ", emissions, "kg CO2 \n")

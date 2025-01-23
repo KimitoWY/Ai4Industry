@@ -60,10 +60,10 @@ if __name__ == "__main__":
     # # Save the trained model
     # model.save("kart_position_model.h5")
 
-    # model = load_model("kart_position_model.h5")
-    # image_path = "canny/frame_0591.jpg"
-    # predicted_class = predict_kart_position(image_path, model)
-    # print(f"Predicted class: {predicted_class}")
+    model = load_model("kart_position_model.h5")
+    image_path = "canny/frame_0591.jpg"
+    predicted_class = predict_kart_position(image_path, model)
+    print(f"Predicted class: {predicted_class}")
 
     # train_images, train_labels = preprocess_images(image_dir, label_dir, img_size)
 
@@ -93,6 +93,5 @@ if __name__ == "__main__":
     # # ImageEdgeProcessor.display_images(edges, curves_image)
 
     # ImageEdgeProcessor.new_process_video('./videoTest/test.mp4',4)
-    ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
     # emissions : float = tracker.stop()
     # print(emissions)

@@ -3,25 +3,6 @@ import os
 import numpy as np
 import folium
 
-def extract_frames(video_path, output_folder):
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-    
-    cap = cv2.VideoCapture(video_path)
-    frame_count = 0
-    
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        cv2.imwrite(os.path.join(output_folder, f'frame_{frame_count:04d}.png'), frame)
-        frame_count += 1
-    
-    cap.release()
-    return frame_count
-
-#frame_count = extract_frames('./data/20240914_target.mp4', 'output_frames')
-
 def detect_features(image_path, mask=None):
     # Lire l'image en niveaux de gris
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -65,15 +46,25 @@ def estimate_motion(good_prev_pts, good_next_pts):
     _, R, t, mask = cv2.recoverPose(E, good_next_pts, good_prev_pts)
     return R, t
 
-def plot_route(movements):
-    # Initialiser la carte à une position centrale
-    m = folium.Map(location=[0, 0], zoom_start=2)
+def rotate_point(x, y, angle):
+    radians = np.deg2rad(angle)
+    cos = np.cos(radians)
+    sin = np.sin(radians)
+    nx = cos * x - sin * y
+    ny = sin * x + cos * y
+    return nx, ny
+
+def plot_route(movements,image_path='data/Ancenis.png'):
+    # Charger l'image de fond
+    image = cv2.imread(image_path)
+    if image is None:
+        raise FileNotFoundError(f"Image not found: {image_path}")
     
     # Initialiser les coordonnées
     coords = [[0, 0]]
     current_position = np.array([0, 0, 0], dtype=np.float32).reshape(3, 1)
     current_rotation = np.eye(3, dtype=np.float32)
-    
+    count = 0
     for R, t in movements:
         # Mettre à jour la position actuelle en appliquant la rotation et la translation
         current_position += current_rotation @ t
@@ -81,60 +72,57 @@ def plot_route(movements):
         
         # Ajouter les nouvelles coordonnées à la liste
         coords.append([current_position[0, 0], current_position[2, 0]])
+        count += 1
         
+    position_factor_x = 1000  # Ajuster ce facteur selon les dimensions de l'image
+    position_factor_y = 2500  # Ajuster ce facteur selon les dimensions de l'image
+    scale_factor = 100  # Adjust this factor as needed to fit the image dimensions
+    rotation_factor = 180  # Adjust this factor as needed for rotation in degrees
+
+
+    # Tracer la route sur l'image
+    for i in range(0, count - 2):
+        pt1 = rotate_point(coords[i][0], coords[i][1], rotation_factor)
+        pt2 = rotate_point(coords[i + 1][0], coords[i + 1][1], rotation_factor)
+        
+        
+        pt1 = pt1[0] * scale_factor + position_factor_x, pt1[1] * scale_factor + position_factor_y
+        pt2 = pt2[0] * scale_factor + position_factor_x, pt2[1] * scale_factor + position_factor_y
+        
+        
+        pt1 = (int(pt1[0]), int(pt1[1]))
+        pt2 = (int(pt2[0]), int(pt2[1]))
+        print(f"Drawing line from {pt1} to {pt2}")  # Debug print
+        cv2.line(image, pt1, pt2, (255, 0, 0), 6)
     
-    # Tracer la route sur la carte
-    folium.PolyLine(coords, color="blue", weight=2.5, opacity=1).add_to(m)
-    m.save('route_map.html')
+    # Sauvegarder l'image avec la route tracée
+    cv2.imwrite("route_map.png", image)
 
-# Définir les région a cacher (x1, y1, x2, y2)
-car_region = [((0, 0), (0, 0)), ((0, 0), (0, 0))]
+def generate_map():
+    frame_count = 1574
+    movements = []
+    if not os.path.exists("result"):
+            os.makedirs("result")
+    # Boucle sur les images pour suivre le mouvement
+    # for i in range(frame_count - 1):
+    for i in range(0, frame_count - 1,4):
+        image_path = f'output_frames/frame_{i:04d}.png'
+        image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        if image is None:
+            print(f"Image not found: {image_path}")
+            continue
+        prev_keypoints, _ = detect_features(image_path)
+        filtered_keypoints = filter_keypoints(prev_keypoints, min_response=0.006, min_size=5)
 
-# Créer le masque
-image = cv2.imread('output_frames/frame_0000.png', cv2.IMREAD_GRAYSCALE)
-mask = create_mask(image.shape, car_region)
+        # Dessiner les points d'intérêt sur l'image
+        image_with_keypoints = cv2.drawKeypoints(image, filtered_keypoints, None, color=(0, 255, 0))
+        cv2.imwrite(f"result/frame_{i:04d}_keypoints.png", image_with_keypoints)
+
+        good_prev_pts, good_next_pts = track_features(image_path, f'output_frames/frame_{i+1:04d}.png', filtered_keypoints)
+        # print(i)
+        R, t = estimate_motion(good_prev_pts, good_next_pts)
+        movements.append((R, t))
+    # Afficher la carte
+    plot_route(movements)
 
 
-'''
-# Détecter les caractéristiques avec le masque
-prev_keypoints, descriptors = detect_features('output_frames/frame_0000.png',mask)
-
-# Filtrer les keypoints
-filtered_keypoints = filter_keypoints(prev_keypoints, min_response=0.005, min_size=1)
-
-# Dessiner les points d'intérêt sur l'image
-image_with_keypoints = cv2.drawKeypoints(cv2.imread('output_frames/frame_0000.png'), filtered_keypoints, None, color=(0, 255, 0))
-cv2.imwrite("frame_0000_keypoints.png", image_with_keypoints)
-
-
-# Suivre les caractéristiques
-good_prev_pts, good_next_pts = track_features('output_frames/frame_0000.png', 'output_frames/frame_0001.png', filtered_keypoints)
-R, t = estimate_motion(good_prev_pts, good_next_pts)
-'''
-
-frame_count = 1574
-movements = []
-if not os.path.exists("result"):
-        os.makedirs("result")
-# Boucle sur les images pour suivre le mouvement
-# for i in range(frame_count - 1):
-for i in range(0, frame_count - 1,4):
-    image_path = f'output_frames/frame_{i:04d}.png'
-    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-    if image is None:
-        print(f"Image not found: {image_path}")
-        continue
-    mask = create_mask(image.shape, car_region)
-    prev_keypoints, _ = detect_features(image_path,mask)
-    filtered_keypoints = filter_keypoints(prev_keypoints, min_response=0.006, min_size=5)
-
-    # Dessiner les points d'intérêt sur l'image
-    image_with_keypoints = cv2.drawKeypoints(image, filtered_keypoints, None, color=(0, 255, 0))
-    cv2.imwrite(f"result/frame_{i:04d}_keypoints.png", image_with_keypoints)
-
-    good_prev_pts, good_next_pts = track_features(image_path, f'output_frames/frame_{i+1:04d}.png', filtered_keypoints)
-    print(i)
-    R, t = estimate_motion(good_prev_pts, good_next_pts)
-    movements.append((R, t))
-# Afficher la carte
-plot_route(movements)

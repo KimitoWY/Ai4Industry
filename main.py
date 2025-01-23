@@ -1,5 +1,6 @@
 from extract_frames import VideoProcessor
 from image_edge_processor import ImageEdgeProcessor
+from map_satellite import generate_map
 from model import load_data, create_classification_model
 from tensorflow.keras.optimizers import Adam
 from PIL import Image
@@ -92,6 +93,9 @@ if __name__ == "__main__":
     # # curves_image = ImageEdgeProcessor.extract_large_curves(edges, './curves_frame_9004.png')
     # # ImageEdgeProcessor.display_images(edges, curves_image)
     
-    ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
+    # ImageEdgeProcessor.new_process_video('./data/20240914_target.mp4',4)
     # emissions : float = tracker.stop()
     # print(emissions)
+    
+    # Generate the map
+    generate_map()

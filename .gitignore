@@ -196,3 +196,4 @@ output_segmented_images
 /output_find_contours/
 *.h5
 emissions.csv
+*.zip
